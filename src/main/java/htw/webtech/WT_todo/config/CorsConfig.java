@@ -14,7 +14,10 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/v1/**")
-                        .allowedOrigins("http://localhost:5173")
+                        .allowedOrigins(
+                                "http://localhost:5173",                    // lokal
+                                "https://wt-todo-frontend-1.onrender.com"   // Render-Frontend
+                        )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
             }
         };
