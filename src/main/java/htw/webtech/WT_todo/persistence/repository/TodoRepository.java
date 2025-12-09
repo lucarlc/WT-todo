@@ -1,0 +1,17 @@
+package htw.webtech.WT_todo.persistence.repository;
+
+import htw.webtech.WT_todo.persistence.entity.TodoEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+/**
+ * TodoRepository ist die Schnittstelle zur Datenbank.
+ * Durch JpaRepository:
+ *  findAll, findById, save, deleteById und weitere.
+ *
+ */
+@Repository
+public interface TodoRepository extends JpaRepository<TodoEntity, Long> {
+    // Zusätzliche Query Methoden kommen später hier hin, z B findByDone(boolean done)
+
+}
