@@ -75,7 +75,7 @@ public class TodoService {
 
     @Transactional
     public void deleteCompleted() {
-        return todoRepository.deleteByDoneTrue();
+        todoRepository.deleteByDoneTrue();
     }
 
     private TodoDTO toDto(TodoEntity entity) {

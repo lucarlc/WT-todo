@@ -29,7 +29,7 @@ class TodoRepositoryTest {
         todoRepository.save(a);
         todoRepository.save(b);
 
-        int deleted = todoRepository.deleteByDoneTrue();
+        long deleted = todoRepository.deleteByDoneTrue();
         assertThat(deleted).isEqualTo(1);
         assertThat(todoRepository.findAll()).hasSize(1);
         assertThat(todoRepository.findAll().get(0).isDone()).isFalse();
