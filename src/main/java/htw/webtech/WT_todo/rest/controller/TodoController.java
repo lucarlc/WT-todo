@@ -1,9 +1,9 @@
 package htw.webtech.WT_todo.rest.controller;
 
-import htw.webtech.WT_todo.rest.model.TodoDTO;
 import htw.webtech.WT_todo.business.service.TodoService;
 import htw.webtech.WT_todo.rest.model.CreateTodoRequest;
 import htw.webtech.WT_todo.rest.model.SetDoneRequest;
+import htw.webtech.WT_todo.rest.model.TodoDTO;
 import htw.webtech.WT_todo.rest.model.UpdateTodoRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/todos")
 public class TodoController {
 
     private final TodoService todoService;
@@ -24,29 +24,24 @@ public class TodoController {
     @GetMapping
     public List<TodoDTO> getAll(
             @RequestParam(required = false) Boolean done,
-            @RequestParam(required = false) String query
+            @RequestParam(required = false) String q
     ) {
-        return todoService.getAll(done, query);
-    }
-
-    @GetMapping("/{id}")
-    public TodoDTO getById(@PathVariable long id) {
-        return todoService.getById(id);
+        return todoService.getAll(done, q);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public TodoDTO create(@Valid @RequestBody CreateTodoRequest request) {
-        return todoService.create(request);
+        return todoService.create(request.getTitle(), request.isDone());
     }
 
     @PutMapping("/{id}")
     public TodoDTO update(@PathVariable long id, @Valid @RequestBody UpdateTodoRequest request) {
-        return todoService.update(id, request);
+        return todoService.update(id, request.getTitle(), request.isDone());
     }
 
     @PatchMapping("/{id}/done")
-    public TodoDTO setDone(@PathVariable long id, @RequestBody SetDoneRequest request) {
+    public TodoDTO setDone(@PathVariable long id, @Valid @RequestBody SetDoneRequest request) {
         return todoService.setDone(id, request.isDone());
     }
 
@@ -57,8 +52,10 @@ public class TodoController {
     }
 
     @DeleteMapping("/completed")
-    public long deleteCompleted() {
-        return todoService.deleteCompleted();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCompleted() {
+        todoService.deleteCompleted();
     }
 }
+
 
