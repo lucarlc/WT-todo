@@ -74,7 +74,7 @@ public class TodoService {
     }
 
     @Transactional
-    public int deleteCompleted() {
+    public void deleteCompleted() {
         return todoRepository.deleteByDoneTrue();
     }
 
