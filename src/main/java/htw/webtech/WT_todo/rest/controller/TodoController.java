@@ -2,8 +2,11 @@ package htw.webtech.WT_todo.rest.controller;
 
 import htw.webtech.WT_todo.rest.model.TodoDTO;
 import htw.webtech.WT_todo.business.service.TodoService;
+import htw.webtech.WT_todo.rest.model.CreateTodoRequest;
+import htw.webtech.WT_todo.rest.model.SetDoneRequest;
+import htw.webtech.WT_todo.rest.model.UpdateTodoRequest;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,22 +15,50 @@ import java.util.List;
 @RequestMapping("/api/v1")
 public class TodoController {
 
-    private final TodoService service;
+    private final TodoService todoService;
 
-    public TodoController(TodoService service) {
-        this.service = service;
+    public TodoController(TodoService todoService) {
+        this.todoService = todoService;
     }
 
-    @GetMapping("/todos")
-    public ResponseEntity<List<TodoDTO>> getTodos() {
-        return ResponseEntity.ok(service.getAllTodos());
+    @GetMapping
+    public List<TodoDTO> getAll(
+            @RequestParam(required = false) Boolean done,
+            @RequestParam(required = false) String query
+    ) {
+        return todoService.getAll(done, query);
     }
 
-    @PostMapping("/todos")
+    @GetMapping("/{id}")
+    public TodoDTO getById(@PathVariable long id) {
+        return todoService.getById(id);
+    }
+
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TodoDTO createTodo(@RequestBody TodoDTO todo) {
-        return service.createTodo(todo);
+    public TodoDTO create(@Valid @RequestBody CreateTodoRequest request) {
+        return todoService.create(request);
+    }
+
+    @PutMapping("/{id}")
+    public TodoDTO update(@PathVariable long id, @Valid @RequestBody UpdateTodoRequest request) {
+        return todoService.update(id, request);
+    }
+
+    @PatchMapping("/{id}/done")
+    public TodoDTO setDone(@PathVariable long id, @RequestBody SetDoneRequest request) {
+        return todoService.setDone(id, request.isDone());
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable long id) {
+        todoService.delete(id);
+    }
+
+    @DeleteMapping("/completed")
+    public long deleteCompleted() {
+        return todoService.deleteCompleted();
     }
 }
-
 

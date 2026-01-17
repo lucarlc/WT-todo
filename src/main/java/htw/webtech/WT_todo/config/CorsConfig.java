@@ -18,7 +18,7 @@ public class CorsConfig {
                                 "http://localhost:5173",                    // lokal
                                 "https://wt-todo-frontend-1.onrender.com"   // Render-Frontend
                         )
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS");
             }
         };
     }

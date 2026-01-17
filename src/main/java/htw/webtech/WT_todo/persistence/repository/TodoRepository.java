@@ -3,7 +3,7 @@ package htw.webtech.WT_todo.persistence.repository;
 import htw.webtech.WT_todo.persistence.entity.TodoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
+import java.util.List;
 /**
  * TodoRepository ist die Schnittstelle zur Datenbank.
  * Durch JpaRepository:
@@ -13,5 +13,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TodoRepository extends JpaRepository<TodoEntity, Long> {
     // Zusätzliche Query Methoden kommen später hier hin, z B findByDone(boolean done)
+    List<TodoEntity> findByDone(boolean done);
 
+    List<TodoEntity> findByTitleContainingIgnoreCase(String query);
+
+    long deleteByDoneTrue();
 }
