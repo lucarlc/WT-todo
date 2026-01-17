@@ -32,12 +32,12 @@ public class TodoController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public TodoDTO create(@Valid @RequestBody CreateTodoRequest request) {
-        return todoService.create(request.getTitle(), request.isDone());
+        return todoService.create(request);
     }
 
     @PutMapping("/{id}")
     public TodoDTO update(@PathVariable long id, @Valid @RequestBody UpdateTodoRequest request) {
-        return todoService.update(id, request.getTitle(), request.isDone());
+        return todoService.update(id, request);
     }
 
     @PatchMapping("/{id}/done")
