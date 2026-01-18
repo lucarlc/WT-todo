@@ -3,6 +3,7 @@ package htw.webtech.WT_todo;
 import htw.webtech.WT_todo.persistence.entity.TodoEntity;
 import htw.webtech.WT_todo.persistence.entity.UserEntity;
 import htw.webtech.WT_todo.persistence.repository.TodoRepository;
+import htw.webtech.WT_todo.persistence.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -49,8 +50,10 @@ class TodoRepositoryTest {
         assertThat(deleted).isEqualTo(1);
         assertThat(todoRepository.findByUser(userA)).hasSize(1);
         assertThat(todoRepository.findByUser(userA).get(0).getTitle()).isEqualTo("A2");
+        assertThat(todoRepository.findByUser(userA).get(0).isDone()).isFalse();
 
         assertThat(todoRepository.findByUser(userB)).hasSize(1);
         assertThat(todoRepository.findByUser(userB).get(0).getTitle()).isEqualTo("B1");
+        assertThat(todoRepository.findByUser(userB).get(0).isDone()).isTrue();
     }
 }
