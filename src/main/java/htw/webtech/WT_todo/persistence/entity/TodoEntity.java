@@ -6,6 +6,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 /**
  * TodoEntity ist das Abbild der Datenbanktabelle "todos".
@@ -28,6 +30,14 @@ public class TodoEntity {
     private boolean done;
 
     /**
+     * Besitzer des Todos. Darf (aus Migrationsgruenden) NULL sein,
+     * aber in der App werden Todos immer einem User zugeordnet.
+     */
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
+
+    /**
      * Leerer Konstruktor ist für JPA Pflicht!
      * JPA erzeugt über Reflection Objekte und braucht das
      */
@@ -38,6 +48,12 @@ public class TodoEntity {
      * Praktischer Konstruktor für eigene Nutzung im Code.
      */
     public TodoEntity(String title, boolean done) {
+        this.title = title;
+        this.done = done;
+    }
+
+    public TodoEntity(UserEntity user, String title, boolean done) {
+        this.user = user;
         this.title = title;
         this.done = done;
     }
@@ -66,5 +82,13 @@ public class TodoEntity {
 
     public void setDone(boolean done) {
         this.done = done;
+    }
+
+    public UserEntity getUser() {
+        return user;
+    }
+
+    public void setUser(UserEntity user) {
+        this.user = user;
     }
 }

@@ -1,6 +1,7 @@
 package htw.webtech.WT_todo.business.service;
 
 import htw.webtech.WT_todo.persistence.entity.TodoEntity;
+import htw.webtech.WT_todo.persistence.entity.UserEntity;
 import htw.webtech.WT_todo.persistence.repository.TodoRepository;
 import htw.webtech.WT_todo.rest.model.CreateTodoRequest;
 import htw.webtech.WT_todo.rest.model.TodoDTO;
@@ -9,46 +10,49 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 public class TodoService {
 
     private final TodoRepository todoRepository;
+    private final UserService userService;
 
-    public TodoService(TodoRepository todoRepository) {
+    public TodoService(TodoRepository todoRepository, UserService userService) {
         this.todoRepository = todoRepository;
+        this.userService = userService;
     }
 
-    public List<TodoDTO> getAll(Boolean done, String query) {
+    public List<TodoDTO> getAll(String username, Boolean done, String query) {
+        UserEntity user = userService.requireByUsername(username);
         List<TodoEntity> entities;
 
         if (done != null) {
-            entities = todoRepository.findByDone(done);
+            entities = todoRepository.findByUserAndDone(user, done);
         } else if (query != null && !query.isBlank()) {
-            entities = todoRepository.findByTitleContainingIgnoreCase(query.trim());
+            entities = todoRepository.findByUserAndTitleContainingIgnoreCase(user, query.trim());
         } else {
-            entities = todoRepository.findAll();
+            entities = todoRepository.findByUser(user);
         }
 
         return entities.stream().map(this::toDto).toList();
     }
 
-    public TodoDTO getById(long id) {
-        TodoEntity entity = todoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Todo nicht gefunden"));
+    public TodoDTO getById(String username, long id) {
+        UserEntity user = userService.requireByUsername(username);
+        TodoEntity entity = requireOwnedTodo(user, id);
         return toDto(entity);
     }
 
-    public TodoDTO create(CreateTodoRequest request) {
-        TodoEntity entity = new TodoEntity(request.getTitle().trim(), request.isDone());
+    public TodoDTO create(String username, CreateTodoRequest request) {
+        UserEntity user = userService.requireByUsername(username);
+        TodoEntity entity = new TodoEntity(user, request.getTitle().trim(), request.isDone());
         TodoEntity saved = todoRepository.save(entity);
         return toDto(saved);
     }
 
-    public TodoDTO update(long id, UpdateTodoRequest request) {
-        TodoEntity entity = todoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Todo nicht gefunden"));
+    public TodoDTO update(String username, long id, UpdateTodoRequest request) {
+        UserEntity user = userService.requireByUsername(username);
+        TodoEntity entity = requireOwnedTodo(user, id);
 
         entity.setTitle(request.getTitle().trim());
         entity.setDone(request.isDone());
@@ -57,25 +61,36 @@ public class TodoService {
         return toDto(saved);
     }
 
-    public TodoDTO setDone(long id, boolean done) {
-        TodoEntity entity = todoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Todo nicht gefunden"));
+    public TodoDTO setDone(String username, long id, boolean done) {
+        UserEntity user = userService.requireByUsername(username);
+        TodoEntity entity = requireOwnedTodo(user, id);
 
         entity.setDone(done);
         TodoEntity saved = todoRepository.save(entity);
         return toDto(saved);
     }
 
-    public void delete(long id) {
-        if (!todoRepository.existsById(id)) {
-            throw new IllegalArgumentException("Todo nicht gefunden");
-        }
-        todoRepository.deleteById(id);
+    public void delete(String username, long id) {
+        UserEntity user = userService.requireByUsername(username);
+        TodoEntity entity = requireOwnedTodo(user, id);
+        todoRepository.deleteById(entity.getId());
     }
 
     @Transactional
-    public void deleteCompleted() {
-        todoRepository.deleteByDoneTrue();
+    public void deleteCompleted(String username) {
+        UserEntity user = userService.requireByUsername(username);
+        todoRepository.deleteByUserAndDoneTrue(user);
+    }
+
+    private TodoEntity requireOwnedTodo(UserEntity user, long todoId) {
+        TodoEntity entity = todoRepository.findById(todoId)
+                .orElseThrow(() -> new IllegalArgumentException("Todo nicht gefunden"));
+
+        // Migrationstolerant: falls alte Todos keine user_id haben, gelten sie nicht als "owned".
+        if (entity.getUser() == null || entity.getUser().getId() == null || !entity.getUser().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("Todo nicht gefunden");
+        }
+        return entity;
     }
 
     private TodoDTO toDto(TodoEntity entity) {
