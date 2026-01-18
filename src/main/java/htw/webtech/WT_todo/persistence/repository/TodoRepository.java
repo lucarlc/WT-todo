@@ -17,5 +17,7 @@ public interface TodoRepository extends JpaRepository<TodoEntity, Long> {
 
     List<TodoEntity> findByTitleContainingIgnoreCase(String query);
 
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("delete from TodoEntity t where t.done = true")
     int deleteByDoneTrue();
 }
